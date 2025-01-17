@@ -73,6 +73,7 @@ public final class StackInterpreter {
 	private static final int RECEIVER_BASE_ARG_OFFSET = -1;
 	private static final int QUALIFIER_BASE_ARG_OFFSET = -2;
 	private static final int FUNCALL_PREFIX = 2;
+	private static final int FUNCALL_PREFIX_SIZE=2;
 
 	public static Object execute(JSObject function, Dictionary dict, JSObject globalEnv) {
 		var stack = new int[96 /* 4096 */];
@@ -165,20 +166,20 @@ public final class StackInterpreter {
 					//push(...);
 				}
 				case Instructions.FUNCALL -> {
-					throw new UnsupportedOperationException("TODO FUNCALL");
+					//throw new UnsupportedOperationException("TODO FUNCALL");
 					// DEBUG
-					//dumpStack(">start funcall dump", stack, sp, bp, dict, heap);
+					dumpStack(">start funcall dump", stack, sp, bp, dict, heap);
 
 					// find argument count
-					//var argumentCount = ...
+					var argumentCount = instrs[pc++];
 					// find baseArg
-					//var baseArg = ...
+					var baseArg = sp -argumentCount;
 					// stack[baseArg] is the first argument
 					// stack[baseArg + RECEIVER_BASE_ARG_OFFSET] is the receiver
 					// stack[baseArg + QUALIFIER_BASE_ARG_OFFSET] is the qualifier (aka the function)
 
 					// decode qualifier
-					//var newFunction = (JSObject) ...
+					var newFunction = (JSObject) decodeAnyValue(stack[baseArg+QUALIFIER_BASE_ARG_OFFSET],dict,heap);
 					//{ // DEBUG
 					//	var receiver = decodeAnyValue(stack[baseArg + RECEIVER_BASE_ARG_OFFSET], dict, heap);
 					//	var args = new Object[argumentCount];
@@ -189,30 +190,30 @@ public final class StackInterpreter {
 					//}
 
 					// check if the function contains a code attribute
-					//var maybeCode = newFunction.lookup("__code__");
-					//if (maybeCode == UNDEFINED) { // native call !
+					var maybeCode = newFunction.lookup("__code__");
+					if (maybeCode == UNDEFINED) { // native call !
 					// decode receiver
-					//var receiver = decodeAnyValue(...);
+					var receiver = decodeAnyValue(stack[baseArg+RECEIVER_BASE_ARG_OFFSET],dict,heap);
 
 					  // decode arguments
-					  //var args = new Object[argumentCount];
-					  //for (var i = 0; i < argumentCount; i++) {
-					  //	args[i] = decodeAnyValue(...);
-					  //}
+					  var args = new Object[argumentCount];
+					  for (var i = 0; i < argumentCount; i++) {
+					  	args[i] = decodeAnyValue(stack[baseArg+i],dict,heap);
+					  }
 
-					  // System.err.println("call native " + newFunction.getName() + " with " +
-					  // receiver + " " + java.util.Arrays.toString(args));
+					   System.err.println("call native " + newFunction.getName() + " with " +
+					   receiver + " " + java.util.Arrays.toString(args));
 
 					  // call native function
-					  //var result = encodeAnyValue(newFunction.invoke(receiver, args), dict);
+					  var result = newFunction.invoke(receiver, args);
 
 					  // fixup sp (receiver and function must be dropped)
-					  //sp = ...
+					  sp = baseArg- FUNCALL_PREFIX_SIZE;
 
 					  // push return value
-					  //push(...);
-					  //continue;
-					//}
+					  push(stack,sp++,encodeAnyValue(result,dict));
+					  continue;
+					}
 					//throw new UnsupportedOperationException("TODO FUNCALL");
 
 					// initialize new code
