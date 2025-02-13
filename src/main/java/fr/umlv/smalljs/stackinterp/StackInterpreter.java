@@ -342,29 +342,29 @@ public final class StackInterpreter {
 				case Instructions.GET -> {
 					throw new UnsupportedOperationException("TODO GET");
 					// get field name from the instructions
-//					var fieldName = (String) decodeDictObject(,dict);
-//
-//					// get reference from the top of the stack
-//					int value = ...
-//					int ref = ...
-//					// get class on heap from the reference
-//					int vClass = ...;
-//					// get JSObject from class
-//					var clazz = (JSObject) decodeDictObject(vClass, dict);
-//					// get field slot from JSObject
-//					int slotOrUndefined = clazz.lookup(fieldName);
-//					if (slotOrUndefined == UNDEFINED) {
-//					// no slot, push undefined
-//						push(..);
-//						continue;
-//					}
-//
+					var fieldName = (String) decodeDictObject(instrs[pc++], dict);
+
+					// get reference from the top of the stack
+					int value = --sp;
+					int ref = decodeReference(value);
+					// get class on heap from the reference
+					int vClass = decodeReference(ref);
+					// get JSObject from class
+					var clazz = (JSObject) decodeDictObject(vClass, dict);
+					// get field slot from JSObject
+					int slotOrUndefined = (int) clazz.lookup(fieldName);
+					if (slotOrUndefined == encodeDictObject(UNDEFINED,dict)) {
+					// no slot, push undefined
+						push(stack,sp++,encodeDictObject(UNDEFINED,dict));
+						continue;
+					}
+
 //					// get the field index
 //					int fieldIndex = ...
 //					// get field value
 //					int fieldValue = ...
 //					// push field value on top of the stack
-//					push(...);
+//					push(stack,sp++,encodeDictObject(fieldValue,dict));
 				}
 				case Instructions.PUT -> {
 					throw new UnsupportedOperationException("TODO PUT");
