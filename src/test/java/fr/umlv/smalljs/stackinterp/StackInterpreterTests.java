@@ -24,7 +24,6 @@ public class StackInterpreterTests {
     return outStream.toString(UTF_8).replace("\r\n", "\n");
   }
 
-  /*
   @Tag("Q2") @Test
   public void helloString() {
     assertEquals("", execute("\"hello\"\n"));
@@ -357,7 +356,7 @@ public class StackInterpreterTests {
                 print(john.foo);
                 """));
   }
-
+/*
   @Tag("Q16") @Test
   public void objectSetAFieldValue() {  // patch visit variable
     assertEquals(
@@ -380,7 +379,7 @@ public class StackInterpreterTests {
                 print(f(obj));
                 """));
   }
-
+/*
   @Tag("Q17") @Test
   public void objectCallAMethod() {
     assertEquals(
