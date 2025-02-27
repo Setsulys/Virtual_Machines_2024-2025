@@ -340,12 +340,12 @@ public final class StackInterpreter {
 					push(stack,sp++,encodeReference(ref));
 				}
 				case Instructions.GET -> {
-					throw new UnsupportedOperationException("TODO GET");
+					//throw new UnsupportedOperationException("TODO GET");
 					// get field name from the instructions
 					var fieldName = (String) decodeDictObject(instrs[pc++], dict);
 
 					// get reference from the top of the stack
-					int value = --sp;
+					int value = pop(stack, --sp);
 					int ref = decodeReference(value);
 					// get class on heap from the reference
 					int vClass = decodeReference(ref);
@@ -360,34 +360,34 @@ public final class StackInterpreter {
 					}
 
 //					// get the field index
-//					int fieldIndex = ...
+					int fieldIndex = slotOrUndefined;
 //					// get field value
-//					int fieldValue = ...
+					int fieldValue = heap[ref+OBJECT_HEADER_SIZE + fieldIndex];
 //					// push field value on top of the stack
-//					push(stack,sp++,encodeDictObject(fieldValue,dict));
+					push(stack,sp++,encodeDictObject(fieldValue,dict));
 				}
 				case Instructions.PUT -> {
-					throw new UnsupportedOperationException("TODO PUT");
+					//throw new UnsupportedOperationException("TODO PUT");
 					// get field name from the instructions
-					// var fieldName = (String) ...
+					 var fieldName = (String) decodeDictObject(instrs[pc++], dict);
 					// get new value from the top of the stack
-					//var value = ...
+					var value = pop(stack, --sp);
 					// get reference from the top of the stack
-					// var ref = decodeReference(...);
+					 var ref = decodeReference(value);
 					// get class on heap from the reference
-					//var vClass = heap[ref];
+					var vClass = heap[ref];
 					// get JSObject from class
-					//var clazz = (JSObject) decodeDictObject(vClass, dict);
+					var clazz = (JSObject) decodeDictObject(vClass, dict);
 					// get field slot from JSObject
-					//var slotOrUndefined = clazz.lookup(fieldName);
-					//if (slotOrUndefined == UNDEFINED) {
-					//	throw new Failure("invalid field " + fieldName);
-					//}
+					var slotOrUndefined = clazz.lookup(fieldName);
+					if (slotOrUndefined == UNDEFINED) {
+						throw new Failure("invalid field " + fieldName);
+					}
 
 					// get the field index
-					//var fieldIndex = ...
+					var fieldIndex = encodeAnyValue(slotOrUndefined,dict);
 					// store field value from the top of the stack on heap
-					//heap[...] = ...;
+					heap[ref + OBJECT_HEADER_SIZE + fieldIndex] =value;
 				}
 				case Instructions.PRINT -> {
 //					throw new UnsupportedOperationException("TODO PRINT");
